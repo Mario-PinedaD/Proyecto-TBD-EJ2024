@@ -19,3 +19,9 @@ CREATE VIEW reporte_lotes
 SELECT Colono_Lote.CL_NUMERO as Cliente, Clientes.CL_NOM as Nombre, Colono_Lote.L_MANZANA as Manzana, Colono_Lote.L_NUMERO as Lote  FROM Colono_Lote
     JOIN Clientes ON Clientes.CL_NUMERO = Colono_Lote.CL_NUMERO
     ORDER BY Nombre;
+
+CREATE VIEW reporte_cargos_fecha
+SELECT CAR_FECHA as Fecha ,Clientes.CL_NUMERO as Cliente,CAR_IMPORTE as Importe FROM CARGOS
+    JOIN Clientes ON Clientes.CL_NUMERO = CARGOS.CL_NUMERO;
+
+SELECT L_MANZANA,L_NUMERO,Lote.L_IMPORTE FROM Lote where Lote.L_IMPORTE != 0 LIMIT 100;
