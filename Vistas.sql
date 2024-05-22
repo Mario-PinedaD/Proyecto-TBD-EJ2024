@@ -9,23 +9,23 @@ CREATE VIEW tipo_lote as
 
 
 -- Esta vista se usa para la primera consulta personalizada
-CREATE VIEW reporte_cargos
+CREATE VIEW reporte_cargos as
 SELECT Clientes.CL_NUMERO as Cliente, Clientes.CL_NOM as Nombre, Clientes.CL_DIREC as Direccion, SUM(CARGOS.CAR_IMPORTE) as Cargo_total
     FROM Clientes
     JOIN CARGOS ON Clientes.CL_NUMERO = CARGOS.CL_NUMERO
     GROUP BY Clientes.CL_NUMERO;
 
-CREATE VIEW reporte_lotes
+CREATE VIEW reporte_lotes as
 SELECT Colono_Lote.CL_NUMERO as Cliente, Clientes.CL_NOM as Nombre, Colono_Lote.L_MANZANA as Manzana, Colono_Lote.L_NUMERO as Lote  FROM Colono_Lote
     JOIN Clientes ON Clientes.CL_NUMERO = Colono_Lote.CL_NUMERO
     ORDER BY Nombre;
 
-CREATE VIEW reporte_cargos_fecha
+CREATE VIEW reporte_cargos_fecha as
 SELECT CAR_FECHA as Fecha ,Clientes.CL_NUMERO as Cliente,CAR_IMPORTE as Importe FROM CARGOS
     JOIN Clientes ON Clientes.CL_NUMERO = CARGOS.CL_NUMERO;
 
-CREATE VIEW reporte_importe_status
+CREATE VIEW reporte_importe_status as
 SELECT Catalogo_COL.CA_DESCRIPCION AS Status,SUM(CARGOS.CAR_IMPORTE) AS Importe_Total FROM Catalogo_COL
     JOIN Lote ON Catalogo_COL.CA_CLAVE = Lote.CA_CLAVE0
     JOIN CARGOS ON Lote.L_MANZANA = CARGOS.L_MANZANA AND Lote.L_NUMERO = CARGOS.L_NUMERO
-    GROUP BY Catalogo_COL.CA_TIPO, Catalogo_COL.CA_DESCRIPCION
+    GROUP BY Catalogo_COL.CA_TIPO, Catalogo_COL.CA_DESCRIPCION;

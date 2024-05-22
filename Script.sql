@@ -1,537 +1,7 @@
-DELIMITER //
+SET GLOBAL log_bin_trust_function_creators = 1;
 
--- Funciones, Triggers y Procedimientos para la tabla CARGOS
+DELIMITER $$
 
--- Función para verificar la existencia de un registro en CARGOS
-CREATE FUNCTION Existe_CARGOS(CAR_FOLIO CHAR(10), ANT_DOCTO_CC_ID DOUBLE) RETURNS BOOLEAN
-BEGIN
-    DECLARE existe BOOLEAN;
-    SELECT COUNT(*) > 0 INTO existe
-    FROM CARGOS
-    WHERE CAR_FOLIO = CAR_FOLIO AND ANT_DOCTO_CC_ID = ANT_DOCTO_CC_ID;
-    RETURN existe;
-END //
-
--- Trigger antes de insertar en CARGOS
-CREATE TRIGGER before_insert_CARGOS
-BEFORE INSERT ON CARGOS
-FOR EACH ROW
-BEGIN
-    IF Existe_CARGOS(NEW.CAR_FOLIO, NEW.ANT_DOCTO_CC_ID) THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'El registro ya existe en CARGOS';
-    END IF;
-END //
-
--- Trigger antes de actualizar en CARGOS
-CREATE TRIGGER before_update_CARGOS
-BEFORE UPDATE ON CARGOS
-FOR EACH ROW
-BEGIN
-    IF NOT Existe_CARGOS(OLD.CAR_FOLIO, OLD.ANT_DOCTO_CC_ID) THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'El registro no existe en CARGOS';
-    END IF;
-END //
-
--- Trigger antes de eliminar en CARGOS
-CREATE TRIGGER before_delete_CARGOS
-BEFORE DELETE ON CARGOS
-FOR EACH ROW
-BEGIN
-    IF NOT Existe_CARGOS(OLD.CAR_FOLIO, OLD.ANT_DOCTO_CC_ID) THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'El registro no existe en CARGOS';
-    END IF;
-END //
-
--- Función para verificar referencias en tablas hijas para CARGOS
-CREATE FUNCTION TieneReferencias_CARGOS(CAR_FOLIO CHAR(10), ANT_DOCTO_CC_ID DOUBLE) RETURNS BOOLEAN
-BEGIN
-    DECLARE existe BOOLEAN;
-    SELECT COUNT(*) > 0 INTO existe
-    FROM OtraTabla -- Reemplaza 'OtraTabla' con la tabla hija real
-    WHERE CAR_FOLIO = CAR_FOLIO AND ANT_DOCTO_CC_ID = ANT_DOCTO_CC_ID;
-    RETURN existe;
-END //
-
--- Trigger antes de eliminar en CARGOS que verifica referencias en tablas hijas
-CREATE TRIGGER before_delete_CARGOS_references
-BEFORE DELETE ON CARGOS
-FOR EACH ROW
-BEGIN
-    IF TieneReferencias_CARGOS(OLD.CAR_FOLIO, OLD.ANT_DOCTO_CC_ID) THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Existen referencias a este registro en otras tablas';
-    END IF;
-END //
-
--- Procedimiento almacenado para insertar en CARGOS
-CREATE PROCEDURE Insertar_CARGOS(
-    IN p_CAR_FOLIO CHAR(10),
-    IN p_ANT_DOCTO_CC_ID DOUBLE,
-    IN p_L_MANZANA CHAR(3),
-    IN p_L_NUMERO CHAR(6),
-    IN p_CON_CLAVE SMALLINT(6),
-    IN p_CAR_FECHA DATETIME,
-    IN p_CAR_IMPORTE DOUBLE,
-    IN p_CAR_IVA DOUBLE,
-    IN p_CAR_DESCRIPCION CHAR(100),
-    IN p_CL_NUMERO DOUBLE,
-    IN p_CAR_POLIZA_PRO CHAR(8),
-    IN p_ANT_CLIENTE_ID INT(11),
-    IN p_ANT_CONC_CC_ID INT(11),
-    IN p_CAR_FECHA_VENCE DATETIME,
-    IN p_CAR_DESCUENTO DOUBLE,
-    IN p_CAR_INICIO SMALLINT(6)
-)
-BEGIN
-    -- Validación de tipos y restricciones aquí
-
-    -- Intentar la inserción
-    INSERT INTO CARGOS (
-        CAR_FOLIO, ANT_DOCTO_CC_ID, L_MANZANA, L_NUMERO, CON_CLAVE, CAR_FECHA,
-        CAR_IMPORTE, CAR_IVA, CAR_DESCRIPCION, CL_NUMERO, CAR_POLIZA_PRO,
-        ANT_CLIENTE_ID, ANT_CONC_CC_ID, CAR_FECHA_VENCE, CAR_DESCUENTO, CAR_INICIO
-    ) VALUES (
-        p_CAR_FOLIO, p_ANT_DOCTO_CC_ID, p_L_MANZANA, p_L_NUMERO, p_CON_CLAVE, p_CAR_FECHA,
-        p_CAR_IMPORTE, p_CAR_IVA, p_CAR_DESCRIPCION, p_CL_NUMERO, p_CAR_POLIZA_PRO,
-        p_ANT_CLIENTE_ID, p_ANT_CONC_CC_ID, p_CAR_FECHA_VENCE, p_CAR_DESCUENTO, p_CAR_INICIO
-    );
-END //
-
--- Procedimiento almacenado para eliminar en CARGOS
-CREATE PROCEDURE Eliminar_CARGOS(
-    IN p_CAR_FOLIO CHAR(10),
-    IN p_ANT_DOCTO_CC_ID DOUBLE
-)
-BEGIN
-    -- Validar tipo de dato de la llave primaria
-    DELETE FROM CARGOS WHERE CAR_FOLIO = p_CAR_FOLIO AND ANT_DOCTO_CC_ID = p_ANT_DOCTO_CC_ID;
-END //
-
--- Procedimiento almacenado para buscar en CARGOS
-CREATE PROCEDURE Buscar_CARGOS(
-    IN p_CAR_FOLIO CHAR(10),
-    IN p_ANT_DOCTO_CC_ID DOUBLE
-)
-BEGIN
-    -- Validar tipos de datos
-    IF p_CAR_FOLIO IS NULL OR p_ANT_DOCTO_CC_ID IS NULL THEN
-        SELECT * FROM CARGOS;
-    ELSE
-        IF Existe_CARGOS(p_CAR_FOLIO, p_ANT_DOCTO_CC_ID) THEN
-            SELECT * FROM CARGOS WHERE CAR_FOLIO = p_CAR_FOLIO AND ANT_DOCTO_CC_ID = p_ANT_DOCTO_CC_ID;
-        ELSE
-            SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'El registro no existe en CARGOS';
-        END IF;
-    END IF;
-END //
-
--- Procedimiento almacenado para actualizar en CARGOS
-CREATE PROCEDURE Actualizar_CARGOS(
-    IN p_CAR_FOLIO CHAR(10),
-    IN p_ANT_DOCTO_CC_ID DOUBLE,
-    IN p_L_MANZANA CHAR(3),
-    IN p_L_NUMERO CHAR(6),
-    IN p_CON_CLAVE SMALLINT(6),
-    IN p_CAR_FECHA DATETIME,
-    IN p_CAR_IMPORTE DOUBLE,
-    IN p_CAR_IVA DOUBLE,
-    IN p_CAR_DESCRIPCION CHAR(100),
-    IN p_CL_NUMERO DOUBLE,
-    IN p_CAR_POLIZA_PRO CHAR(8),
-    IN p_ANT_CLIENTE_ID INT(11),
-    IN p_ANT_CONC_CC_ID INT(11),
-    IN p_CAR_FECHA_VENCE DATETIME,
-    IN p_CAR_DESCUENTO DOUBLE,
-    IN p_CAR_INICIO SMALLINT(6)
-)
-BEGIN
-    -- Validación de tipos y restricciones aquí
-
-    -- Intentar la actualización
-    UPDATE CARGOS
-    SET
-        L_MANZANA = p_L_MANZANA,
-        L_NUMERO = p_L_NUMERO,
-        CON_CLAVE = p_CON_CLAVE,
-        CAR_FECHA = p_CAR_FECHA,
-        CAR_IMPORTE = p_CAR_IMPORTE,
-        CAR_IVA = p_CAR_IVA,
-        CAR_DESCRIPCION = p_CAR_DESCRIPCION,
-        CL_NUMERO = p_CL_NUMERO,
-        CAR_POLIZA_PRO = p_CAR_POLIZA_PRO,
-        ANT_CLIENTE_ID = p_ANT_CLIENTE_ID,
-        ANT_CONC_CC_ID = p_ANT_CONC_CC_ID,
-        CAR_FECHA_VENCE = p_CAR_FECHA_VENCE,
-        CAR_DESCUENTO = p_CAR_DESCUENTO,
-        CAR_INICIO = p_CAR_INICIO
-    WHERE CAR_FOLIO = p_CAR_FOLIO AND ANT_DOCTO_CC_ID = p_ANT_DOCTO_CC_ID;
-END //
------------------------------------------------------------------------
--- Funciones, Triggers y Procedimientos para la tabla Catalogo_COL
-
--- Función para verificar la existencia de un registro en Catalogo_COL
-CREATE FUNCTION Existe_Catalogo_COL(CA_CLAVE CHAR(3)) RETURNS BOOLEAN
-BEGIN
-    DECLARE existe BOOLEAN;
-    SELECT COUNT(*) > 0 INTO existe
-    FROM Catalogo_COL
-    WHERE CA_CLAVE = CA_CLAVE;
-    RETURN existe;
-END //
-
--- Trigger antes de insertar en Catalogo_COL
-CREATE TRIGGER before_insert_Catalogo_COL
-BEFORE INSERT ON Catalogo_COL
-FOR EACH ROW
-BEGIN
-    IF Existe_Catalogo_COL(NEW.CA_CLAVE) THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'El registro ya existe en Catalogo_COL';
-    END IF;
-END //
-
--- Trigger antes de actualizar en Catalogo_COL
-CREATE TRIGGER before_update_Catalogo_COL
-BEFORE UPDATE ON Catalogo_COL
-FOR EACH ROW
-BEGIN
-    IF NOT Existe_Catalogo_COL(OLD.CA_CLAVE) THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'El registro no existe en Catalogo_COL';
-    END IF;
-END //
-
--- Trigger antes de eliminar en Catalogo_COL
-CREATE TRIGGER before_delete_Catalogo_COL
-BEFORE DELETE ON Catalogo_COL
-FOR EACH ROW
-BEGIN
-    IF NOT Existe_Catalogo_COL(OLD.CA_CLAVE) THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'El registro no existe en Catalogo_COL';
-    END IF;
-END //
-
--- Función para verificar referencias en tablas hijas para Catalogo_COL
-CREATE FUNCTION TieneReferencias_Catalogo_COL(CA_CLAVE CHAR(3)) RETURNS BOOLEAN
-BEGIN
-    DECLARE existe BOOLEAN;
-    SELECT COUNT(*) > 0 INTO existe
-    FROM OtraTabla -- Reemplaza 'OtraTabla' con la tabla hija real
-    WHERE CA_CLAVE = CA_CLAVE;
-    RETURN existe;
-END //
-
--- Trigger antes de eliminar en Catalogo_COL que verifica referencias en tablas hijas
-CREATE TRIGGER before_delete_Catalogo_COL_references
-BEFORE DELETE ON Catalogo_COL
-FOR EACH ROW
-BEGIN
-    IF TieneReferencias_Catalogo_COL(OLD.CA_CLAVE) THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Existen referencias a este registro en otras tablas';
-    END IF;
-END //
-
--- Procedimiento almacenado para insertar en Catalogo_COL
-CREATE PROCEDURE Insertar_Catalogo_COL(
-    IN p_CA_CLAVE CHAR(3),
-    IN p_CA_DESCRIPCION CHAR(50),
-    IN p_CA_TIPO CHAR(1)
-)
-BEGIN
-    -- Validación de tipos y restricciones aquí
-
-    -- Intentar la inserción
-    INSERT INTO Catalogo_COL (
-        CA_CLAVE, CA_DESCRIPCION, CA_TIPO
-    ) VALUES (
-        p_CA_CLAVE, p_CA_DESCRIPCION, p_CA_TIPO
-    );
-END //
-
--- Procedimiento almacenado para eliminar en Catalogo_COL
-CREATE PROCEDURE Eliminar_Catalogo_COL(
-    IN p_CA_CLAVE CHAR(3)
-)
-BEGIN
-    -- Validar tipo de dato de la llave primaria
-    DELETE FROM Catalogo_COL WHERE CA_CLAVE = p_CA_CLAVE;
-END //
-
--- Procedimiento almacenado para buscar en Catalogo_COL
-CREATE PROCEDURE Buscar_Catalogo_COL(
-    IN p_CA_CLAVE CHAR(3)
-)
-BEGIN
-    -- Validar tipos de datos
-    IF p_CA_CLAVE IS NULL THEN
-        SELECT * FROM Catalogo_COL;
-    ELSE
-        IF Existe_Catalogo_COL(p_CA_CLAVE) THEN
-            SELECT * FROM Catalogo_COL WHERE CA_CLAVE = p_CA_CLAVE;
-        ELSE
-            SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'El registro no existe en Catalogo_COL';
-        END IF;
-    END IF;
-END //
-
--- Procedimiento almacenado para actualizar en Catalogo_COL
-CREATE PROCEDURE Actualizar_Catalogo_COL(
-    IN p_CA_CLAVE CHAR(3),
-    IN p_CA_DESCRIPCION CHAR(50),
-    IN p_CA_TIPO CHAR(1)
-)
-BEGIN
-    -- Validación de tipos y restricciones aquí
-
-    -- Intentar la actualización
-    UPDATE Catalogo_COL
-    SET
-        CA_DESCRIPCION = p_CA_DESCRIPCION,
-        CA_TIPO = p_CA_TIPO
-    WHERE CA_CLAVE = p_CA_CLAVE;
-END //
-----------------------------------------------------------------------------------------------------------
--- Funciones, Triggers y Procedimientos para la tabla Colono_Lote
-
--- Función para verificar la existencia de un registro en Colono_Lote
-CREATE FUNCTION Existe_Colono_Lote(CL_NUMERO DOUBLE, L_MANZANA CHAR(3), L_NUMERO CHAR(6)) RETURNS BOOLEAN
-BEGIN
-    DECLARE existe BOOLEAN;
-    SELECT COUNT(*) > 0 INTO existe
-    FROM Colono_Lote
-    WHERE CL_NUMERO = CL_NUMERO AND L_MANZANA = L_MANZANA AND L_NUMERO = L_NUMERO;
-    RETURN existe;
-END //
-
--- Trigger antes de insertar en Colono_Lote
-CREATE TRIGGER before_insert_Colono_Lote
-BEFORE INSERT ON Colono_Lote
-FOR EACH ROW
-BEGIN
-    IF Existe_Colono_Lote(NEW.CL_NUMERO, NEW.L_MANZANA, NEW.L_NUMERO) THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'El registro ya existe en Colono_Lote';
-    END IF;
-END //
-
--- Trigger antes de actualizar en Colono_Lote
-CREATE TRIGGER before_update_Colono_Lote
-BEFORE UPDATE ON Colono_Lote
-FOR EACH ROW
-BEGIN
-    IF NOT Existe_Colono_Lote(OLD.CL_NUMERO, OLD.L_MANZANA, OLD.L_NUMERO) THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'El registro no existe en Colono_Lote';
-    END IF;
-END //
-
--- Trigger antes de eliminar en Colono_Lote
-CREATE TRIGGER before_delete_Colono_Lote
-BEFORE DELETE ON Colono_Lote
-FOR EACH ROW
-BEGIN
-    IF NOT Existe_Colono_Lote(OLD.CL_NUMERO, OLD.L_MANZANA, OLD.L_NUMERO) THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'El registro no existe en Colono_Lote';
-    END IF;
-END //
-
--- Función para verificar referencias en tablas hijas para Colono_Lote
-CREATE FUNCTION TieneReferencias_Colono_Lote(CL_NUMERO DOUBLE, L_MANZANA CHAR(3), L_NUMERO CHAR(6)) RETURNS BOOLEAN
-BEGIN
-    DECLARE existe BOOLEAN;
-    SELECT COUNT(*) > 0 INTO existe
-    FROM OtraTabla -- Reemplaza 'OtraTabla' con la tabla hija real
-    WHERE CL_NUMERO = CL_NUMERO AND L_MANZANA = L_MANZANA AND L_NUMERO = L_NUMERO;
-    RETURN existe;
-END //
-
--- Trigger antes de eliminar en Colono_Lote que verifica referencias en tablas hijas
-CREATE TRIGGER before_delete_Colono_Lote_references
-BEFORE DELETE ON Colono_Lote
-FOR EACH ROW
-BEGIN
-    IF TieneReferencias_Colono_Lote(OLD.CL_NUMERO, OLD.L_MANZANA, OLD.L_NUMERO) THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Existen referencias a este registro en otras tablas';
-    END IF;
-END //
-
--- Procedimiento almacenado para insertar en Colono_Lote
-CREATE PROCEDURE Insertar_Colono_Lote(
-    IN p_CL_NUMERO DOUBLE,
-    IN p_L_MANZANA CHAR(3),
-    IN p_L_NUMERO CHAR(6)
-)
-BEGIN
-    -- Validación de tipos y restricciones aquí
-
-    -- Intentar la inserción
-    INSERT INTO Colono_Lote (
-        CL_NUMERO, L_MANZANA, L_NUMERO
-    ) VALUES (
-        p_CL_NUMERO, p_L_MANZANA, p_L_NUMERO
-    );
-END //
-
--- Procedimiento almacenado para eliminar en Colono_Lote
-CREATE PROCEDURE Eliminar_Colono_Lote(
-    IN p_CL_NUMERO DOUBLE,
-    IN p_L_MANZANA CHAR(3),
-    IN p_L_NUMERO CHAR(6)
-)
-BEGIN
-    -- Validar tipo de dato de la llave primaria
-    DELETE FROM Colono_Lote WHERE CL_NUMERO = p_CL_NUMERO AND L_MANZANA = p_L_MANZANA AND L_NUMERO = p_L_NUMERO;
-END //
-
--- Procedimiento almacenado para buscar en Colono_Lote
-CREATE PROCEDURE Buscar_Colono_Lote(
-    IN p_CL_NUMERO DOUBLE,
-    IN p_L_MANZANA CHAR(3),
-    IN p_L_NUMERO CHAR(6)
-)
-BEGIN
-    -- Validar tipos de datos
-    IF p_CL_NUMERO IS NULL OR p_L_MANZANA IS NULL OR p_L_NUMERO IS NULL THEN
-        SELECT * FROM Colono_Lote;
-    ELSE
-        IF Existe_Colono_Lote(p_CL_NUMERO, p_L_MANZANA, p_L_NUMERO) THEN
-            SELECT * FROM Colono_Lote WHERE CL_NUMERO = p_CL_NUMERO AND L_MANZANA = p_L_MANZANA AND L_NUMERO = p_L_NUMERO;
-        ELSE
-            SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'El registro no existe en Colono_Lote';
-        END IF;
-    END IF;
-END //
-
--- Procedimiento almacenado para actualizar en Colono_Lote
-CREATE PROCEDURE Actualizar_Colono_Lote(
-    IN p_CL_NUMERO DOUBLE,
-    IN p_L_MANZANA CHAR(3),
-    IN p_L_NUMERO CHAR(6)
-)
-BEGIN
-    -- Validación de tipos y restricciones aquí
-
-    -- Intentar la actualización
-    UPDATE Colono_Lote
-    SET
-        L_MANZANA = p_L_MANZANA,
-        L_NUMERO = p_L_NUMERO
-    WHERE CL_NUMERO = p_CL_NUMERO AND L_MANZANA = p_L_MANZANA AND L_NUMERO = p_L_NUMERO;
-END //
--------------------------------------------------------------------------------
--- Funciones, Triggers y Procedimientos para la tabla DIRECCION
-
--- Función para verificar la existencia de un registro en DIRECCION
-CREATE FUNCTION Existe_DIRECCION(CA_CLAVE CHAR(3)) RETURNS BOOLEAN
-BEGIN
-    DECLARE existe BOOLEAN;
-    SELECT COUNT(*) > 0 INTO existe
-    FROM DIRECCION
-    WHERE CA_CLAVE = CA_CLAVE;
-    RETURN existe;
-END //
-
--- Trigger antes de insertar en DIRECCION
-CREATE TRIGGER before_insert_DIRECCION
-BEFORE INSERT ON DIRECCION
-FOR EACH ROW
-BEGIN
-    IF Existe_DIRECCION(NEW.CA_CLAVE) THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'El registro ya existe en DIRECCION';
-    END IF;
-END //
-
--- Trigger antes de actualizar en DIRECCION
-CREATE TRIGGER before_update_DIRECCION
-BEFORE UPDATE ON DIRECCION
-FOR EACH ROW
-BEGIN
-    IF NOT Existe_DIRECCION(OLD.CA_CLAVE) THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'El registro no existe en DIRECCION';
-    END IF;
-END //
-
--- Trigger antes de eliminar en DIRECCION
-CREATE TRIGGER before_delete_DIRECCION
-BEFORE DELETE ON DIRECCION
-FOR EACH ROW
-BEGIN
-    IF NOT Existe_DIRECCION(OLD.CA_CLAVE) THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'El registro no existe en DIRECCION';
-    END IF;
-END //
-
--- Función para verificar referencias en tablas hijas para DIRECCION
-CREATE FUNCTION TieneReferencias_DIRECCION(CA_CLAVE CHAR(3)) RETURNS BOOLEAN
-BEGIN
-    DECLARE existe BOOLEAN;
-    SELECT COUNT(*) > 0 INTO existe
-    FROM OtraTabla -- Reemplaza 'OtraTabla' con la tabla hija real
-    WHERE CA_CLAVE = CA_CLAVE;
-    RETURN existe;
-END //
-
--- Trigger antes de eliminar en DIRECCION que verifica referencias en tablas hijas
-CREATE TRIGGER before_delete_DIRECCION_references
-BEFORE DELETE ON DIRECCION
-FOR EACH ROW
-BEGIN
-    IF TieneReferencias_DIRECCION(OLD.CA_CLAVE) THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Existen referencias a este registro en otras tablas';
-    END IF;
-END //
-
--- Procedimiento almacenado para insertar en DIRECCION
-CREATE PROCEDURE Insertar_DIRECCION(
-    IN p_CA_CLAVE CHAR(3),
-    IN p_CA_DESCRIPCION CHAR(50)
-)
-BEGIN
-    -- Validación de tipos y restricciones aquí
-
-    -- Intentar la inserción
-    INSERT INTO DIRECCION (
-        CA_CLAVE, CA_DESCRIPCION
-    ) VALUES (
-        p_CA_CLAVE, p_CA_DESCRIPCION
-    );
-END //
-
--- Procedimiento almacenado para eliminar en DIRECCION
-CREATE PROCEDURE Eliminar_DIRECCION(
-    IN p_CA_CLAVE CHAR(3)
-)
-BEGIN
-    -- Validar tipo de dato de la llave primaria
-    DELETE FROM DIRECCION WHERE CA_CLAVE = p_CA_CLAVE;
-END //
-
--- Procedimiento almacenado para buscar en DIRECCION
-CREATE PROCEDURE Buscar_DIRECCION(
-    IN p_CA_CLAVE CHAR(3)
-)
-BEGIN
-    -- Validar tipos de datos
-    IF p_CA_CLAVE IS NULL THEN
-        SELECT * FROM DIRECCION;
-    ELSE
-        IF Existe_DIRECCION(p_CA_CLAVE) THEN
-            SELECT * FROM DIRECCION WHERE CA_CLAVE = p_CA_CLAVE;
-        ELSE
-            SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'El registro no existe en DIRECCION';
-        END IF;
-    END IF;
-END //
-
--- Procedimiento almacenado para actualizar en DIRECCION
-CREATE PROCEDURE Actualizar_DIRECCION(
-    IN p_CA_CLAVE CHAR(3),
-    IN p_CA_DESCRIPCION CHAR(50)
-)
-BEGIN
-    -- Validación de tipos y restricciones aquí
-
-    -- Intentar la actualización
-    UPDATE DIRECCION
-    SET
-        CA_DESCRIPCION = p_CA_DESCRIPCION
-    WHERE CA_CLAVE = p_CA_CLAVE;
-END //
 -------------------------------------------------------------------------------------------------
 -- Funciones, Triggers y Procedimientos para la tabla LOTE
 
@@ -540,60 +10,60 @@ CREATE FUNCTION Existe_LOTE(L_MANZANA CHAR(3), L_NUMERO CHAR(6)) RETURNS BOOLEAN
 BEGIN
     DECLARE existe BOOLEAN;
     SELECT COUNT(*) > 0 INTO existe
-    FROM LOTE
+    FROM Lote
     WHERE L_MANZANA = L_MANZANA AND L_NUMERO = L_NUMERO;
     RETURN existe;
-END //
+END $$
 
 -- Trigger antes de insertar en LOTE
 CREATE TRIGGER before_insert_LOTE
-BEFORE INSERT ON LOTE
+BEFORE INSERT ON Lote
 FOR EACH ROW
 BEGIN
     IF Existe_LOTE(NEW.L_MANZANA, NEW.L_NUMERO) THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'El registro ya existe en LOTE';
     END IF;
-END //
+END $$
 
 -- Trigger antes de actualizar en LOTE
 CREATE TRIGGER before_update_LOTE
-BEFORE UPDATE ON LOTE
+BEFORE UPDATE ON Lote
 FOR EACH ROW
 BEGIN
     IF NOT Existe_LOTE(OLD.L_MANZANA, OLD.L_NUMERO) THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'El registro no existe en LOTE';
     END IF;
-END //
+END $$
 
 -- Trigger antes de eliminar en LOTE
 CREATE TRIGGER before_delete_LOTE
-BEFORE DELETE ON LOTE
+BEFORE DELETE ON Lote
 FOR EACH ROW
 BEGIN
     IF NOT Existe_LOTE(OLD.L_MANZANA, OLD.L_NUMERO) THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'El registro no existe en LOTE';
     END IF;
-END //
+END $$
 
 -- Función para verificar referencias en tablas hijas para LOTE
 CREATE FUNCTION TieneReferencias_LOTE(L_MANZANA CHAR(3), L_NUMERO CHAR(6)) RETURNS BOOLEAN
 BEGIN
     DECLARE existe BOOLEAN;
     SELECT COUNT(*) > 0 INTO existe
-    FROM OtraTabla -- Reemplaza 'OtraTabla' con la tabla hija real
+    FROM Colono_Lote -- Reemplaza 'OtraTabla' con la tabla hija real
     WHERE L_MANZANA = L_MANZANA AND L_NUMERO = L_NUMERO;
     RETURN existe;
-END //
+END $$
 
 -- Trigger antes de eliminar en LOTE que verifica referencias en tablas hijas
 CREATE TRIGGER before_delete_LOTE_references
-BEFORE DELETE ON LOTE
+BEFORE DELETE ON Lote
 FOR EACH ROW
 BEGIN
     IF TieneReferencias_LOTE(OLD.L_MANZANA, OLD.L_NUMERO) THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Existen referencias a este registro en otras tablas';
     END IF;
-END //
+END $$
 
 -- Procedimiento almacenado para insertar en LOTE
 CREATE PROCEDURE Insertar_LOTE(
@@ -608,12 +78,12 @@ BEGIN
     -- Validación de tipos y restricciones aquí
 
     -- Intentar la inserción
-    INSERT INTO LOTE (
+    INSERT INTO Lote (
         L_MANZANA, L_NUMERO, L_SUPERFICIE, L_U_C, L_P, L_OBS
     ) VALUES (
         p_L_MANZANA, p_L_NUMERO, p_L_SUPERFICIE, p_L_U_C, p_L_P, p_L_OBS
     );
-END //
+END $$
 
 -- Procedimiento almacenado para eliminar en LOTE
 CREATE PROCEDURE Eliminar_LOTE(
@@ -622,8 +92,8 @@ CREATE PROCEDURE Eliminar_LOTE(
 )
 BEGIN
     -- Validar tipo de dato de la llave primaria
-    DELETE FROM LOTE WHERE L_MANZANA = p_L_MANZANA AND L_NUMERO = p_L_NUMERO;
-END //
+    DELETE FROM Lote WHERE L_MANZANA = p_L_MANZANA AND L_NUMERO = p_L_NUMERO;
+END $$
 
 -- Procedimiento almacenado para buscar en LOTE
 CREATE PROCEDURE Buscar_LOTE(
@@ -633,15 +103,15 @@ CREATE PROCEDURE Buscar_LOTE(
 BEGIN
     -- Validar tipos de datos
     IF p_L_MANZANA IS NULL OR p_L_NUMERO IS NULL THEN
-        SELECT * FROM LOTE;
+        SELECT * FROM Lote;
     ELSE
         IF Existe_LOTE(p_L_MANZANA, p_L_NUMERO) THEN
-            SELECT * FROM LOTE WHERE L_MANZANA = p_L_MANZANA AND L_NUMERO = p_L_NUMERO;
+            SELECT * FROM Lote WHERE L_MANZANA = p_L_MANZANA AND L_NUMERO = p_L_NUMERO;
         ELSE
             SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'El registro no existe en LOTE';
         END IF;
     END IF;
-END //
+END $$
 
 -- Procedimiento almacenado para actualizar en LOTE
 CREATE PROCEDURE Actualizar_LOTE(
@@ -656,12 +126,378 @@ BEGIN
     -- Validación de tipos y restricciones aquí
 
     -- Intentar la actualización
-    UPDATE LOTE
+    UPDATE Lote
     SET
         L_SUPERFICIE = p_L_SUPERFICIE,
         L_U_C = p_L_U_C,
         L_P = p_L_P,
         L_OBS = p_L_OBS
     WHERE L_MANZANA = p_L_MANZANA AND L_NUMERO = p_L_NUMERO;
-END //
+END $$
 
+-- ================================================
+-- Funciones, Triggers y Procedimientos para Clientes
+-- ================================================
+
+-- Función para verificar si existe un registro en Clientes
+CREATE FUNCTION Existe_Cliente(p_CL_NUMERO DOUBLE) RETURNS BOOLEAN
+BEGIN
+    DECLARE existe BOOLEAN;
+    SELECT COUNT(*) > 0 INTO existe
+    FROM Clientes
+    WHERE CL_NUMERO = p_CL_NUMERO;
+    RETURN existe;
+END $$
+
+-- Trigger antes de insertar en Clientes que verifica duplicados
+CREATE TRIGGER before_insert_Clientes
+BEFORE INSERT ON Clientes
+FOR EACH ROW
+BEGIN
+    IF Existe_Cliente(NEW.CL_NUMERO) THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'El registro ya existe en Clientes';
+    END IF;
+END $$
+
+-- Trigger antes de actualizar en Clientes que verifica la existencia del registro
+CREATE TRIGGER before_update_Clientes
+BEFORE UPDATE ON Clientes
+FOR EACH ROW
+BEGIN
+    IF NOT Existe_Cliente(OLD.CL_NUMERO) THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'El registro no existe en Clientes';
+    END IF;
+END $$
+
+-- Trigger antes de borrar en Clientes que verifica la existencia del registro
+CREATE TRIGGER before_delete_Clientes
+BEFORE DELETE ON Clientes
+FOR EACH ROW
+BEGIN
+    IF NOT Existe_Cliente(OLD.CL_NUMERO) THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'El registro no existe en Clientes';
+    END IF;
+END $$
+
+-- Función para verificar referencias en tablas hijas para Clientes
+CREATE FUNCTION TieneReferencias_Clientes(CL_NUMERO DOUBLE) RETURNS BOOLEAN
+BEGIN
+    DECLARE existe BOOLEAN;
+    SELECT COUNT(*) > 0 INTO existe
+    FROM Colono_Lote
+    WHERE CL_NUMERO = CL_NUMERO;
+    RETURN existe;
+END $$
+
+-- Trigger antes de eliminar en Clientes que verifica referencias en tablas hijas
+CREATE TRIGGER before_delete_Clientes_references
+BEFORE DELETE ON Clientes
+FOR EACH ROW
+BEGIN
+    IF TieneReferencias_Clientes(OLD.CL_NUMERO) THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Existen referencias a este registro en otras tablas';
+    END IF;
+END $$
+
+-- Procedimiento almacenado para insertar en Clientes
+CREATE PROCEDURE Insertar_Cliente(
+    IN p_CL_NUMERO DOUBLE,
+    IN p_CL_TERR SMALLINT,
+    IN p_CL_NOM CHAR(200),
+    IN p_CL_CONT CHAR(200),
+    IN p_CL_DIREC CHAR(100),
+    IN p_CL_CIUD CHAR(50),
+    IN p_CL_COLONIA CHAR(100),
+    IN p_CL_CP FLOAT,
+    IN p_CL_LADA FLOAT,
+    IN p_CL_TELEF CHAR(50),
+    IN p_CL_DSCTO FLOAT,
+    IN p_CL_DPAGO SMALLINT,
+    IN p_CL_DCRED SMALLINT,
+    IN p_CL_FPAGO DATETIME,
+    IN p_CL_FULTR DATETIME,
+    IN p_CL_CRED FLOAT,
+    IN p_CL_SALDO FLOAT,
+    IN p_CL_RFC CHAR(13),
+    IN p_CL_CURP CHAR(18),
+    IN p_CL_GIRO CHAR(100),
+    IN p_CL_CUOTA FLOAT,
+    IN p_CL_LOCALIDAD SMALLINT,
+    IN p_CL_FISM SMALLINT,
+    IN p_CL_FAFM SMALLINT,
+    IN p_CL_MUNICIPIO CHAR(100),
+    IN p_CL_ESTADO CHAR(100),
+    IN p_CL_LOCALIDAD_FACT CHAR(100),
+    IN p_CL_NUM_INT CHAR(15),
+    IN p_CL_NUM_EXT CHAR(15),
+    IN p_CL_MAIL CHAR(100),
+    IN p_C_CTA SMALLINT,
+    IN p_C_SCTA1 INT,
+    IN p_C_SCTA2 INT,
+    IN p_C_SCTA3 DOUBLE,
+    IN p_C_SCTA4 INT,
+    IN p_CL_CONTACTO CHAR(50),
+    IN p_CL_BANCO CHAR(50),
+    IN p_CL_CTA_BANCO CHAR(20),
+    IN p_CL_CLABE_BANCO CHAR(20),
+    IN p_CL_FECHA_BAJA DATETIME
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SELECT 'Ocurrió un error durante la inserción en la tabla Clientes' AS mensaje;
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    -- Validación de tipos y restricciones aquí
+    IF p_CL_NUMERO IS NULL OR p_CL_NOM IS NULL THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Los campos CL_NUMERO y CL_NOM son obligatorios';
+    END IF;
+
+    -- Intentar la inserción
+    INSERT INTO Clientes (
+        CL_NUMERO, CL_TERR, CL_NOM, CL_CONT, CL_DIREC, CL_CIUD, CL_COLONIA, CL_CP, CL_LADA, CL_TELEF, CL_DSCTO, CL_DPAGO,
+        CL_DCRED, CL_FPAGO, CL_FULTR, CL_CRED, CL_SALDO, CL_RFC, CL_CURP, CL_GIRO, CL_CUOTA, CL_LOCALIDAD, CL_FISM, CL_FAFM,
+        CL_MUNICIPIO, CL_ESTADO, CL_LOCALIDAD_FACT, CL_NUM_INT, CL_NUM_EXT, CL_MAIL, C_CTA, C_SCTA1, C_SCTA2, C_SCTA3,
+        C_SCTA4, CL_CONTACTO, CL_BANCO, CL_CTA_BANCO, CL_CLABE_BANCO, CL_FECHA_BAJA
+    ) VALUES (
+        p_CL_NUMERO, p_CL_TERR, p_CL_NOM, p_CL_CONT, p_CL_DIREC, p_CL_CIUD, p_CL_COLONIA, p_CL_CP, p_CL_LADA, p_CL_TELEF,
+        p_CL_DSCTO, p_CL_DPAGO, p_CL_DCRED, p_CL_FPAGO, p_CL_FULTR, p_CL_CRED, p_CL_SALDO, p_CL_RFC, p_CL_CURP, p_CL_GIRO,
+        p_CL_CUOTA, p_CL_LOCALIDAD, p_CL_FISM, p_CL_FAFM, p_CL_MUNICIPIO, p_CL_ESTADO, p_CL_LOCALIDAD_FACT, p_CL_NUM_INT,
+        p_CL_NUM_EXT, p_CL_MAIL, p_C_CTA, p_C_SCTA1, p_C_SCTA2, p_C_SCTA3, p_C_SCTA4, p_CL_CONTACTO, p_CL_BANCO, p_CL_CTA_BANCO,
+        p_CL_CLABE_BANCO, p_CL_FECHA_BAJA
+    );
+
+    COMMIT;
+END $$
+
+-- Procedimiento almacenado para eliminar en Clientes
+CREATE PROCEDURE Eliminar_Cliente(IN p_CL_NUMERO DOUBLE)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SELECT 'Ocurrió un error durante la eliminación en la tabla Clientes' AS mensaje;
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    IF p_CL_NUMERO IS NULL THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'El campo CL_NUMERO es obligatorio';
+    END IF;
+
+    DELETE FROM Clientes WHERE CL_NUMERO = p_CL_NUMERO;
+
+    COMMIT;
+END $$
+
+-- Procedimiento almacenado para buscar en Clientes
+CREATE PROCEDURE Buscar_Cliente(IN p_CL_NUMERO DOUBLE)
+BEGIN
+    IF p_CL_NUMERO IS NULL THEN
+        SELECT * FROM Clientes;
+    ELSE
+        SELECT * FROM Clientes WHERE CL_NUMERO = p_CL_NUMERO;
+    END IF;
+END $$
+
+-- Procedimiento almacenado para actualizar en Clientes
+CREATE PROCEDURE Actualizar_Cliente(
+    IN p_CL_NUMERO DOUBLE,
+    IN p_CL_TERR SMALLINT,
+    IN p_CL_NOM CHAR(200),
+    IN p_CL_CONT CHAR(200),
+    IN p_CL_DIREC CHAR(100),
+    IN p_CL_CIUD CHAR(50),
+    IN p_CL_COLONIA CHAR(100),
+    IN p_CL_CP FLOAT,
+    IN p_CL_LADA FLOAT,
+    IN p_CL_TELEF CHAR(50),
+    IN p_CL_DSCTO FLOAT,
+    IN p_CL_DPAGO SMALLINT,
+    IN p_CL_DCRED SMALLINT,
+    IN p_CL_FPAGO DATETIME,
+    IN p_CL_FULTR DATETIME,
+    IN p_CL_CRED FLOAT,
+    IN p_CL_SALDO FLOAT,
+    IN p_CL_RFC CHAR(13),
+    IN p_CL_CURP CHAR(18),
+    IN p_CL_GIRO CHAR(100),
+    IN p_CL_CUOTA FLOAT,
+    IN p_CL_LOCALIDAD SMALLINT,
+    IN p_CL_FISM SMALLINT,
+    IN p_CL_FAFM SMALLINT,
+    IN p_CL_MUNICIPIO CHAR(100),
+    IN p_CL_ESTADO CHAR(100),
+    IN p_CL_LOCALIDAD_FACT CHAR(100),
+    IN p_CL_NUM_INT CHAR(15),
+    IN p_CL_NUM_EXT CHAR(15),
+    IN p_CL_MAIL CHAR(100),
+    IN p_C_CTA SMALLINT,
+    IN p_C_SCTA1 INT,
+    IN p_C_SCTA2 INT,
+    IN p_C_SCTA3 DOUBLE,
+    IN p_C_SCTA4 INT,
+    IN p_CL_CONTACTO CHAR(50),
+    IN p_CL_BANCO CHAR(50),
+    IN p_CL_CTA_BANCO CHAR(20),
+    IN p_CL_CLABE_BANCO CHAR(20),
+    IN p_CL_FECHA_BAJA DATETIME
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SELECT 'Ocurrió un error durante la actualización en la tabla Clientes' AS mensaje;
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    -- Validación de tipos y restricciones aquí
+    IF p_CL_NUMERO IS NULL OR p_CL_NOM IS NULL THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Los campos CL_NUMERO y CL_NOM son obligatorios';
+    END IF;
+
+    -- Intentar la actualización
+    UPDATE Clientes
+    SET
+        CL_TERR = p_CL_TERR,
+        CL_NOM = p_CL_NOM,
+        CL_CONT = p_CL_CONT,
+        CL_DIREC = p_CL_DIREC,
+        CL_CIUD = p_CL_CIUD,
+        CL_COLONIA = p_CL_COLONIA,
+        CL_CP = p_CL_CP,
+        CL_LADA = p_CL_LADA,
+        CL_TELEF = p_CL_TELEF,
+        CL_DSCTO = p_CL_DSCTO,
+        CL_DPAGO = p_CL_DPAGO,
+        CL_DCRED = p_CL_DCRED,
+        CL_FPAGO = p_CL_FPAGO,
+        CL_FULTR = p_CL_FULTR,
+        CL_CRED = p_CL_CRED,
+        CL_SALDO = p_CL_SALDO,
+        CL_RFC = p_CL_RFC,
+        CL_CURP = p_CL_CURP,
+        CL_GIRO = p_CL_GIRO,
+        CL_CUOTA = p_CL_CUOTA,
+        CL_LOCALIDAD = p_CL_LOCALIDAD,
+        CL_FISM = p_CL_FISM,
+        CL_FAFM = p_CL_FAFM,
+        CL_MUNICIPIO = p_CL_MUNICIPIO,
+        CL_ESTADO = p_CL_ESTADO,
+        CL_LOCALIDAD_FACT = p_CL_LOCALIDAD_FACT,
+        CL_NUM_INT = p_CL_NUM_INT,
+        CL_NUM_EXT = p_CL_NUM_EXT,
+        CL_MAIL = p_CL_MAIL,
+        C_CTA = p_C_CTA,
+        C_SCTA1 = p_C_SCTA1,
+        C_SCTA2 = p_C_SCTA2,
+        C_SCTA3 = p_C_SCTA3,
+        C_SCTA4 = p_C_SCTA4,
+        CL_CONTACTO = p_CL_CONTACTO,
+        CL_BANCO = p_CL_BANCO,
+        CL_CTA_BANCO = p_CL_CTA_BANCO,
+        CL_CLABE_BANCO = p_CL_CLABE_BANCO,
+        CL_FECHA_BAJA = p_CL_FECHA_BAJA
+    WHERE CL_NUMERO = p_CL_NUMERO;
+
+    COMMIT;
+END $$
+
+-- ================================================
+-- Funciones, Triggers y Procedimientos para la Vista status
+-- ================================================
+
+-- Función para verificar si existe un registro en la vista status
+CREATE FUNCTION Existe_Status(p_CA_CLAVE CHAR(5)) RETURNS BOOLEAN
+BEGIN
+    DECLARE existe BOOLEAN;
+    SELECT COUNT(*) > 0 INTO existe
+    FROM status
+    WHERE CA_CLAVE = p_CA_CLAVE;
+    RETURN existe;
+END $$
+
+-- Trigger antes de insertar en status que verifica duplicados
+CREATE TRIGGER before_insert_status
+BEFORE INSERT ON status
+FOR EACH ROW
+BEGIN
+    IF Existe_Status(NEW.CA_CLAVE) THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'El registro ya existe en la vista status';
+    END IF;
+END $$
+
+-- Trigger antes de actualizar en status que verifica la existencia del registro
+CREATE TRIGGER before_update_status
+BEFORE UPDATE ON status
+FOR EACH ROW
+BEGIN
+    IF NOT Existe_Status(OLD.CA_CLAVE) THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'El registro no existe en la vista status';
+    END IF;
+END $$
+
+-- Trigger antes de borrar en status que verifica la existencia del registro
+CREATE TRIGGER before_delete_status
+BEFORE DELETE ON status
+FOR EACH ROW
+BEGIN
+    IF NOT Existe_Status(OLD.CA_CLAVE) THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'El registro no existe en la vista status';
+    END IF;
+END $$
+
+-- ================================================
+-- Funciones, Triggers y Procedimientos para la Vista tipo_lote
+-- ================================================
+
+-- Función para verificar si existe un registro en la vista tipo_lote
+CREATE FUNCTION Existe_Tipo_Lote(p_CA_CLAVE CHAR(5)) RETURNS BOOLEAN
+BEGIN
+    DECLARE existe BOOLEAN;
+    SELECT COUNT(*) > 0 INTO existe
+    FROM tipo_lote
+    WHERE CA_CLAVE = p_CA_CLAVE;
+    RETURN existe;
+END $$
+
+-- Trigger antes de insertar en tipo_lote que verifica duplicados
+CREATE TRIGGER before_insert_tipo_lote
+BEFORE INSERT ON tipo_lote
+FOR EACH ROW
+BEGIN
+    IF Existe_Tipo_Lote(NEW.CA_CLAVE) THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'El registro ya existe en la vista tipo_lote';
+    END IF;
+END $$
+
+-- Trigger antes de actualizar en tipo_lote que verifica la existencia del registro
+CREATE TRIGGER before_update_tipo_lote
+BEFORE UPDATE ON tipo_lote
+FOR EACH ROW
+BEGIN
+    IF NOT Existe_Tipo_Lote(OLD.CA_CLAVE) THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'El registro no existe en la vista tipo_lote';
+    END IF;
+END $$
+
+-- Trigger antes de borrar en tipo_lote que verifica la existencia del registro
+CREATE TRIGGER before_delete_tipo_lote
+BEFORE DELETE ON tipo_lote
+FOR EACH ROW
+BEGIN
+    IF NOT Existe_Tipo_Lote(OLD.CA_CLAVE) THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'El registro no existe en la vista tipo_lote';
+    END IF;
+END $$
+
+DELIMITER ;
+
+SHOW procedure status where Db = 'fraccionamiento';
+
+drop procedure Eliminar_CARGOS;
+drop PROCEDURE Insertar_CARGOS;
