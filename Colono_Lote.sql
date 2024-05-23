@@ -15,7 +15,7 @@ BEGIN
 END $$
 
 -- Trigger antes de insertar en Colono_Lote
-CREATE TRIGGER before_insert_Colono_Lote
+CREATE TRIGGER Antes_Insert_Colono_Lote
 BEFORE INSERT ON Colono_Lote
 FOR EACH ROW
 BEGIN
@@ -25,7 +25,7 @@ BEGIN
 END $$
 
 -- Trigger antes de actualizar en Colono_Lote
-CREATE TRIGGER before_update_Colono_Lote
+CREATE TRIGGER Antes_Update_Colono_Lote
 BEFORE UPDATE ON Colono_Lote
 FOR EACH ROW
 BEGIN
@@ -35,7 +35,7 @@ BEGIN
 END $$
 
 -- Trigger antes de eliminar en Colono_Lote
-CREATE TRIGGER before_delete_Colono_Lote
+CREATE TRIGGER Antes_Delete_Colono_Lote
 BEFORE DELETE ON Colono_Lote
 FOR EACH ROW
 BEGIN
@@ -49,13 +49,13 @@ CREATE FUNCTION TieneReferencias_Colono_Lote(CL_NUMERO DOUBLE, L_MANZANA CHAR(3)
 BEGIN
     DECLARE existe BOOLEAN;
     SELECT COUNT(*) > 0 INTO existe
-    FROM CARGOS -- Reemplaza 'OtraTabla' con la tabla hija real
+    FROM CARGOS
     WHERE CL_NUMERO = CARGOS.CL_NUMERO AND L_MANZANA = CARGOS.L_MANZANA AND L_NUMERO = CARGOS.L_NUMERO;
     RETURN existe;
 END $$
 
 -- Trigger antes de eliminar en Colono_Lote que verifica referencias en tablas hijas
-CREATE TRIGGER before_delete_Colono_Lote_references
+CREATE TRIGGER Antes_Delete_Colono_Lote_References
 BEFORE DELETE ON Colono_Lote
 FOR EACH ROW
 BEGIN
@@ -68,16 +68,23 @@ END $$
 CREATE PROCEDURE Insertar_Colono_Lote(
     IN p_CL_NUMERO DOUBLE,
     IN p_L_MANZANA CHAR(3),
-    IN p_L_NUMERO CHAR(6)
+    IN p_L_NUMERO CHAR(6),
+    IN p_CL_TELEFONO CHAR(35),
+    IN p_CL_MAIL CHAR(100),
+    IN p_CL_IMPORTE DOUBLE,
+    IN p_CL_FECHA_ALTA DATETIME,
+    IN p_CL_FECHA_BAJA DATETIME,
+    IN p_CL_COMENTARIO VARCHAR(45)
+
 )
 BEGIN
     -- Validación de tipos y restricciones aquí
 
     -- Intentar la inserción
-    INSERT INTO Colono_Lote (
-        CL_NUMERO, L_MANZANA, L_NUMERO
-    ) VALUES (
-        p_CL_NUMERO, p_L_MANZANA, p_L_NUMERO
+    INSERT INTO Colono_Lote VALUES (
+        p_CL_NUMERO, p_L_MANZANA, p_L_NUMERO,
+        p_CL_TELEFONO, p_CL_MAIL, p_CL_IMPORTE,
+        p_CL_FECHA_ALTA, p_CL_FECHA_BAJA, p_CL_COMENTARIO
     );
 END $$
 
@@ -115,7 +122,14 @@ END $$
 CREATE PROCEDURE Actualizar_Colono_Lote(
     IN p_CL_NUMERO DOUBLE,
     IN p_L_MANZANA CHAR(3),
-    IN p_L_NUMERO CHAR(6)
+    IN p_L_NUMERO CHAR(6),
+    IN p_CL_TELEFONO CHAR(35),
+    IN p_CL_MAIL CHAR(100),
+    IN p_CL_IMPORTE DOUBLE,
+    IN p_CL_FECHA_ALTA DATETIME,
+    IN p_CL_FECHA_BAJA DATETIME,
+    IN p_CL_COMENTARIO VARCHAR(45)
+
 )
 BEGIN
     -- Validación de tipos y restricciones aquí
@@ -124,7 +138,13 @@ BEGIN
     UPDATE Colono_Lote
     SET
         L_MANZANA = p_L_MANZANA,
-        L_NUMERO = p_L_NUMERO
+        L_NUMERO = p_L_NUMERO,
+	CL_TELEFONO = p_CL_TELEFONO,
+	CL_MAIL = p_CL_MAIL,
+	CL_IMPORTE = p_CL_IMPORTE,
+	CL_FECHA_ALTA = p_FECHA_ALTA,
+	CL_FECHA_BAJA = p_FECHA_BAJA,
+	CL_COMENTARIO = p_CL_COMENTARIO
     WHERE CL_NUMERO = p_CL_NUMERO AND L_MANZANA = p_L_MANZANA AND L_NUMERO = p_L_NUMERO;
 END $$
 

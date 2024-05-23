@@ -13,7 +13,7 @@ BEGIN
 END $$
 
 -- Trigger antes de insertar en Catalogo_COL
-CREATE TRIGGER before_insert_Catalogo_COL
+CREATE TRIGGER Antes_Insert_Catalogo_COL
 BEFORE INSERT ON Catalogo_COL
 FOR EACH ROW
 BEGIN
@@ -23,7 +23,7 @@ BEGIN
 END $$
 
 -- Trigger antes de actualizar en Catalogo_COL
-CREATE TRIGGER before_update_Catalogo_COL
+CREATE TRIGGER Antes_Update_Catalogo_COL
 BEFORE UPDATE ON Catalogo_COL
 FOR EACH ROW
 BEGIN
@@ -33,7 +33,7 @@ BEGIN
 END $$
 
 -- Trigger antes de eliminar en Catalogo_COL
-CREATE TRIGGER before_delete_Catalogo_COL
+CREATE TRIGGER Antes_Delete_Catalogo_COL
 BEFORE DELETE ON Catalogo_COL
 FOR EACH ROW
 BEGIN
@@ -47,13 +47,13 @@ CREATE FUNCTION TieneReferencias_Catalogo_COL(CA_CLAVE CHAR(3)) RETURNS BOOLEAN
 BEGIN
     DECLARE existe BOOLEAN;
     SELECT COUNT(*) > 0 INTO existe
-    FROM Lote -- Reemplaza 'OtraTabla' con la tabla hija real
+    FROM Lote
     WHERE CA_CLAVE = Lote.CA_CLAVE0 or CA_CLAVE = Lote.CA_CLAVE1 or CA_CLAVE = Lote.CA_CLAVE2;
     RETURN existe;
 END $$
 
 -- Trigger antes de eliminar en Catalogo_COL que verifica referencias en tablas hijas
-CREATE TRIGGER before_delete_Catalogo_COL_references
+CREATE TRIGGER Antes_Delete_Catalogo_COL_references
 BEFORE DELETE ON Catalogo_COL
 FOR EACH ROW
 BEGIN
