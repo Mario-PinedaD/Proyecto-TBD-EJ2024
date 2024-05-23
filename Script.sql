@@ -67,22 +67,26 @@ END $$
 
 -- Procedimiento almacenado para insertar en LOTE
 CREATE PROCEDURE Insertar_LOTE(
-    IN p_L_MANZANA CHAR(3),
-    IN p_L_NUMERO CHAR(6),
-    IN p_L_SUPERFICIE DOUBLE,
-    IN p_L_U_C VARCHAR(30),
-    IN p_L_P VARCHAR(30),
-    IN p_L_OBS VARCHAR(60)
+    IN p_L_manzana CHAR(3),
+    IN p_L_numero CHAR(6),
+    IN p_L_ca_clave1 CHAR(3),
+    IN p_L_ca_clave2 CHAR(3),
+    IN p_L_ca_clave0 CHAR(3),
+    IN p_L_total_m2 DOUBLE,
+    IN p_L_importe DOUBLE,
+    IN p_L_num_ext CHAR(6),
+    IN p_L_paht_map CHAR(150),
+    IN p_L_fecha_mant DATETIME,
+    IN p_L_fecha_posibe DATETIME
 )
 BEGIN
     -- Validación de tipos y restricciones aquí
 
     -- Intentar la inserción
-    INSERT INTO Lote (
-        L_MANZANA, L_NUMERO, L_SUPERFICIE, L_U_C, L_P, L_OBS
-    ) VALUES (
-        p_L_MANZANA, p_L_NUMERO, p_L_SUPERFICIE, p_L_U_C, p_L_P, p_L_OBS
-    );
+     INSERT INTO Lote (L_MANZANA, L_NUMERO, CA_CLAVE1, CA_CLAVE2, CA_CLAVE0, L_TOTAL_M2,
+                       L_IMPORTE, L_NUM_EXT, L_PAHT_MAP, L_FECHA_MANT, L_FECHA_POSIBLE)
+        VALUES (l_manzana_param, l_numero_param, ca_clave1_param, ca_clave2_param, ca_clave0_param,
+                l_total_m2_param, l_importe_param, l_num_ext_param, l_paht_map_param, l_fecha_mant_param, l_fecha_posible_param);
 END $$
 
 -- Procedimiento almacenado para eliminar en LOTE
@@ -115,12 +119,17 @@ END $$
 
 -- Procedimiento almacenado para actualizar en LOTE
 CREATE PROCEDURE Actualizar_LOTE(
-    IN p_L_MANZANA CHAR(3),
-    IN p_L_NUMERO CHAR(6),
-    IN p_L_SUPERFICIE DOUBLE,
-    IN p_L_U_C VARCHAR(30),
-    IN p_L_P VARCHAR(30),
-    IN p_L_OBS VARCHAR(60)
+    IN p_L_manzana CHAR(3),
+    IN p_L_numero CHAR(6),
+    IN p_L_ca_clave1 CHAR(3),
+    IN p_L_ca_clave2 CHAR(3),
+    IN p_L_ca_clave0 CHAR(3),
+    IN p_L_total_m2 DOUBLE,
+    IN p_L_importe DOUBLE,
+    IN p_L_num_ext CHAR(6),
+    IN p_L_paht_map CHAR(150),
+    IN p_L_fecha_mant DATETIME,
+    IN p_L_fecha_posibe DATETIME
 )
 BEGIN
     -- Validación de tipos y restricciones aquí
@@ -128,10 +137,18 @@ BEGIN
     -- Intentar la actualización
     UPDATE Lote
     SET
-        L_SUPERFICIE = p_L_SUPERFICIE,
-        L_U_C = p_L_U_C,
-        L_P = p_L_P,
-        L_OBS = p_L_OBS
+        L_MANZANA = p_L_manzana,
+        L_NUMERO = p_L_numero,
+        CA_CLAVE1 = p_L_ca_clave1,
+        CA_CLAVE2 = p_L_ca_clave2,
+        CA_CLAVE0 = p_L_ca_clave0,
+        L_TOTAL_M2 = p_L_total_m2,
+        L_IMPORTE = p_L_importe,
+        L_NUM_EXT = p_L_num_ext,
+        L_PAHT_MAP = p_L_paht_map,
+        L_FECHA_MANT = p_L_fecha_mant,
+        L_FECHA_POSIBLE = p_L_fecha_posibe
+
     WHERE L_MANZANA = p_L_MANZANA AND L_NUMERO = p_L_NUMERO;
 END $$
 
