@@ -79,13 +79,16 @@ CREATE PROCEDURE Insertar_Colono_Lote(
 )
 BEGIN
     -- Validación de tipos y restricciones aquí
-
+    IF p_CL_NUMERO IS NULL OR p_L_MANZANA IS NULL OR p_L_NUMERO IS NULL THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT ='El numero de cliente, el numero de manzana y numero de lote no puede ser NULL';
+    ELSE
     -- Intentar la inserción
     INSERT INTO Colono_Lote VALUES (
         p_CL_NUMERO, p_L_MANZANA, p_L_NUMERO,
         p_CL_TELEFONO, p_CL_MAIL, p_CL_IMPORTE,
         p_CL_FECHA_ALTA, p_CL_FECHA_BAJA, p_CL_COMENTARIO
     );
+    END IF;
 END $$
 
 -- Procedimiento almacenado para eliminar en Colono_Lote
@@ -95,8 +98,12 @@ CREATE PROCEDURE Eliminar_Colono_Lote(
     IN p_L_NUMERO CHAR(6)
 )
 BEGIN
+    IF p_CL_NUMERO IS NULL OR p_L_MANZANA IS NULL OR p_L_NUMERO IS NULL THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT ='El numero de cliente, el numero de manzana y numero de lote no puede ser NULL';
+    ELSE
     -- Validar tipo de dato de la llave primaria
-    DELETE FROM Colono_Lote WHERE CL_NUMERO = p_CL_NUMERO AND L_MANZANA = p_L_MANZANA AND L_NUMERO = p_L_NUMERO;
+        DELETE FROM Colono_Lote WHERE CL_NUMERO = p_CL_NUMERO AND L_MANZANA = p_L_MANZANA AND L_NUMERO = p_L_NUMERO;
+    END IF;
 END $$
 
 -- Procedimiento almacenado para buscar en Colono_Lote
@@ -133,7 +140,9 @@ CREATE PROCEDURE Actualizar_Colono_Lote(
 )
 BEGIN
     -- Validación de tipos y restricciones aquí
-
+    IF p_CL_NUMERO IS NULL OR p_L_MANZANA IS NULL OR p_L_NUMERO IS NULL THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT ='El numero de cliente, el numero de manzana y numero de lote no puede ser NULL';
+    ELSE
     -- Intentar la actualización
     UPDATE Colono_Lote
     SET
@@ -142,10 +151,11 @@ BEGIN
 	CL_TELEFONO = p_CL_TELEFONO,
 	CL_MAIL = p_CL_MAIL,
 	CL_IMPORTE = p_CL_IMPORTE,
-	CL_FECHA_ALTA = p_FECHA_ALTA,
-	CL_FECHA_BAJA = p_FECHA_BAJA,
+	CL_FECHA_ALTA = p_CL_FECHA_ALTA,
+	CL_FECHA_BAJA = p_CL_FECHA_BAJA,
 	CL_COMENTARIO = p_CL_COMENTARIO
     WHERE CL_NUMERO = p_CL_NUMERO AND L_MANZANA = p_L_MANZANA AND L_NUMERO = p_L_NUMERO;
+    END IF;
 END $$
 
 DELIMITER ;
