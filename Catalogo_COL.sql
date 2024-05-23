@@ -28,7 +28,6 @@ END $$
 
 -- Trigger antes de actualizar en Catalogo_COL
 DROP TRIGGER IF EXISTS Antes_Actualizar_CATALOGO_COL $$
-
 CREATE TRIGGER Antes_Actualizar_CATALOGO_COL
 BEFORE UPDATE ON CATALOGO_COL
 FOR EACH ROW
@@ -40,7 +39,6 @@ END $$
 
 -- Trigger antes de eliminar en Catalogo_COL
 DROP TRIGGER IF EXISTS Antes_Eliminar_CATALOGO_COL $$
-
 CREATE TRIGGER Antes_Eliminar_CATALOGO_COL
 BEFORE DELETE ON CATALOGO_COL
 FOR EACH ROW
@@ -57,14 +55,13 @@ CREATE FUNCTION TieneReferencias_CATALOGO_COL(CA_CLAVE CHAR(3)) RETURNS BOOLEAN
 BEGIN
     DECLARE existe BOOLEAN;
     SELECT COUNT(*) > 0 INTO existe
-    FROM LOTE -- Reemplaza 'OtraTabla' con la tabla hija real
-    WHERE CA_CLAVE = LOTE.CA_CLAVE0 or CA_CLAVE = LOTE.CA_CLAVE1 or CA_CLAVE = LOTE.CA_CLAVE2;
+    FROM Lote
+    WHERE CA_CLAVE = Lote.CA_CLAVE0 or CA_CLAVE = Lote.CA_CLAVE1 or CA_CLAVE = Lote.CA_CLAVE2;
     RETURN existe;
 END $$
 
 -- Trigger antes de eliminar en Catalogo_COL que verifica referencias en tablas hijas
 DROP TRIGGER IF EXISTS Antes_Eliminar_CATALOGO_COL_Ref $$
-
 CREATE TRIGGER Antes_Eliminar_CATALOGO_COL_Ref
 BEFORE DELETE ON CATALOGO_COL
 FOR EACH ROW
@@ -86,13 +83,16 @@ CREATE PROCEDURE Insertar_CATALOGO_COL(
 )
 BEGIN
     -- Validación de tipos y restricciones aquí
-
+    IF p_CA_CLAVE IS NULL THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT ='La clave no puede ser null';
+    ELSE
     -- Intentar la inserción
     INSERT INTO CATALOGO_COL (
         CA_CLAVE, CA_DESCRIPCION, CA_TIPO, CA_IMPORTE, CON_CLAVE
     ) VALUES (
         p_CA_CLAVE, p_CA_DESCRIPCION, p_CA_TIPO,p_CA_IMPORTE,p_CON_CLAVE
     );
+    END IF;
 END $$
 
 -- Procedimiento almacenado para eliminar en Catalogo_COL
@@ -103,7 +103,11 @@ CREATE PROCEDURE Eliminar_CATALOGO_COL(
 )
 BEGIN
     -- Validar tipo de dato de la llave primaria
-    DELETE FROM CATALOGO_COL WHERE CA_CLAVE = p_CA_CLAVE;
+    IF p_CA_CLAVE IS NULL THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT ='La clave no puede ser null';
+    ELSE
+        DELETE FROM CATALOGO_COL WHERE CA_CLAVE = p_CA_CLAVE;
+    END IF;
 END $$
 
 -- Procedimiento almacenado para buscar en Catalogo_COL
@@ -137,7 +141,9 @@ CREATE PROCEDURE Actualizar_CATALOGO_COL(
 )
 BEGIN
     -- Validación de tipos y restricciones aquí
-
+    IF p_CA_CLAVE IS NULL THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT ='La clave no puede ser null';
+    ELSE
     -- Intentar la actualización
     UPDATE CATALOGO_COL
     SET
