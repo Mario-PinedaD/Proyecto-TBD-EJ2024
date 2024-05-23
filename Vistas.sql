@@ -62,4 +62,34 @@ BEGIN
     END IF;
 END$$
 
+DROP FUNCTION IF EXISTS Existe_Status;
+CREATE FUNCTION Existe_Status(clave_catalogo CHAR(3)) RETURNS BOOLEAN
+BEGIN
+    DECLARE existe BOOLEAN;
+    SELECT COUNT(*) > 0 INTO existe
+    FROM status
+    WHERE status.clave_catalogo = clave_catalogo;
+    RETURN existe;
+END$$
+
+DROP FUNCTION IF EXISTS Existe_Direccion;
+CREATE FUNCTION Existe_Direccion(clave_catalogo CHAR(3)) RETURNS BOOLEAN
+BEGIN
+    DECLARE existe BOOLEAN;
+    SELECT COUNT(*) > 0 INTO existe
+    FROM direccion
+    WHERE direccion.clave_catalogo = clave_catalogo;
+    RETURN existe;
+END$$
+
+DROP FUNCTION IF EXISTS Existe_TipoLote;
+CREATE FUNCTION Existe_TipoLote(clave_catalogo CHAR(3)) RETURNS BOOLEAN
+BEGIN
+    DECLARE existe BOOLEAN;
+    SELECT COUNT(*) > 0 INTO existe
+    FROM tipo_lote
+    WHERE tipo_lote.clave_catalogo = clave_catalogo;
+    RETURN existe;
+END$$
+
 DELIMITER ;
