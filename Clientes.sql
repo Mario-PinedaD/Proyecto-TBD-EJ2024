@@ -1,4 +1,6 @@
 -- Función para verificar si existe un registro en Clientes
+DROP FUNCTION IF EXISTS Existe_CLIENTES $$
+
 CREATE FUNCTION Existe_CLIENTES(p_CL_NUMERO DOUBLE) RETURNS BOOLEAN
 BEGIN
     DECLARE existe BOOLEAN;
@@ -9,6 +11,8 @@ BEGIN
 END $$
 
 -- Trigger antes de insertar en Clientes que verifica duplicados
+DROP TRIGGER IF EXISTS Antes_Insertar_CLIENTES $$
+
 CREATE TRIGGER Antes_Insertar_CLIENTES
 BEFORE INSERT ON CLIENTES
 FOR EACH ROW
@@ -19,6 +23,8 @@ BEGIN
 END $$
 
 -- Trigger antes de actualizar en Clientes que verifica la existencia del registro
+DROP TRIGGER IF EXISTS Antes_Actualizar_CLIENTES $$
+
 CREATE TRIGGER Antes_Actualizar_CLIENTES
 BEFORE UPDATE ON CLIENTES
 FOR EACH ROW
@@ -29,7 +35,9 @@ BEGIN
 END $$
 
 -- Trigger antes de borrar en Clientes que verifica la existencia del registro
-CREATE TRIGGER Antes_Borar_CLIENTES
+DROP TRIGGER IF EXISTS Antes_Eliminar_CLIENTES $$
+
+CREATE TRIGGER Antes_Eliminar_CLIENTES
 BEFORE DELETE ON CLIENTES
 FOR EACH ROW
 BEGIN
@@ -39,6 +47,8 @@ BEGIN
 END $$
 
 -- Función para verificar referencias en tablas hijas para Clientes
+DROP FUNCTION IF EXISTS TieneReferencias_CLIENTES $$
+
 CREATE FUNCTION TieneReferencias_CLIENTES(CL_NUMERO DOUBLE) RETURNS BOOLEAN
 BEGIN
     DECLARE existe BOOLEAN;
@@ -49,6 +59,8 @@ BEGIN
 END $$
 
 -- Trigger antes de eliminar en Clientes que verifica referencias en tablas hijas
+DROP TRIGGER IF EXISTS Antes_Eliminar_CLIENTES_Ref $$
+
 CREATE TRIGGER Antes_Eliminar_CLIENTES_Ref
 BEFORE DELETE ON CLIENTES
 FOR EACH ROW
@@ -59,6 +71,8 @@ BEGIN
 END $$
 
 -- Procedimiento almacenado para insertar en Clientes
+DROP PROCEDURE IF EXISTS Insertar_CLIENTES $$
+
 CREATE PROCEDURE Insertar_CLIENTES(
     IN p_CL_NUMERO DOUBLE,
     IN p_CL_TERR SMALLINT,
@@ -133,6 +147,8 @@ BEGIN
 END $$
 
 -- Procedimiento almacenado para eliminar en Clientes
+DROP PROCEDURE IF EXISTS Eliminar_CLIENTES $$
+
 CREATE PROCEDURE Eliminar_CLIENTES(IN p_CL_NUMERO DOUBLE)
 BEGIN
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
@@ -153,6 +169,8 @@ BEGIN
 END $$
 
 -- Procedimiento almacenado para buscar en Clientes
+DROP PROCEDURE IF EXISTS Buscar_CLIENTES $$
+
 CREATE PROCEDURE Buscar_CLIENTES(IN p_CL_NUMERO DOUBLE)
 BEGIN
     IF p_CL_NUMERO IS NULL THEN
@@ -163,6 +181,8 @@ BEGIN
 END $$
 
 -- Procedimiento almacenado para actualizar en Clientes
+DROP PROCEDURE IF EXISTS Actualizar_CLIENTES $$
+
 CREATE PROCEDURE Actualizar_CLIENTES(
     IN p_CL_NUMERO DOUBLE,
     IN p_CL_TERR SMALLINT,
