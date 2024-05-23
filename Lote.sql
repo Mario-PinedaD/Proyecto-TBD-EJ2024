@@ -21,6 +21,12 @@ FOR EACH ROW
 BEGIN
     IF Existe_LOTE(NEW.L_MANZANA, NEW.L_NUMERO) THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'El registro ya existe en LOTE';
+    ELSEIF Existe_Status(NEW.CA_CLAVE0) THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'El status referenciado no existe.';
+    ELSEIF Existe_Direccion(NEW.CA_CLAVE1) THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'La direccion referenciada no existe.';
+    ELSEIF Existe_TipoLote(NEW.CA_CLAVE2) THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'El tipo de lote referenciado no existe.';
     END IF;
 END $$
 
@@ -33,6 +39,12 @@ FOR EACH ROW
 BEGIN
     IF NOT Existe_LOTE(OLD.L_MANZANA, OLD.L_NUMERO) THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'El registro no existe en LOTE';
+    ELSEIF Existe_Status(NEW.CA_CLAVE0) THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'El status referenciado no existe.';
+    ELSEIF Existe_Direccion(NEW.CA_CLAVE1) THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'La direccion referenciada no existe.';
+    ELSEIF Existe_TipoLote(NEW.CA_CLAVE2) THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'El tipo de lote referenciado no existe.';
     END IF;
 END $$
 
