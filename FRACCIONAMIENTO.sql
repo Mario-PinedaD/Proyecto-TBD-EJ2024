@@ -18,6 +18,10 @@
 -- Table structure for table `CARGOS`
 --
 
+DROP DATABASE IF EXISTS fraccionamiento;
+CREATE DATABASE fraccionamiento;
+USE fraccionamiento;
+
 DROP TABLE IF EXISTS `CARGOS`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
