@@ -1,6 +1,8 @@
 -- Funciones, Triggers y Procedimientos para la tabla LOTE
 
 -- Función para verificar la existencia de un registro en LOTE
+DROP FUNCTION IF EXISTS Existe_LOTE $$
+
 CREATE FUNCTION Existe_LOTE(L_MANZANA CHAR(3), L_NUMERO CHAR(6)) RETURNS BOOLEAN
 BEGIN
     DECLARE existe BOOLEAN;
@@ -11,6 +13,8 @@ BEGIN
 END $$
 
 -- Trigger antes de insertar en LOTE
+DROP TRIGGER IF EXISTS Antes_Insertar_LOTE $$
+
 CREATE TRIGGER Antes_Insertar_LOTE
 BEFORE INSERT ON LOTE
 FOR EACH ROW
@@ -21,6 +25,8 @@ BEGIN
 END $$
 
 -- Trigger antes de actualizar en LOTE
+DROP TRIGGER IF EXISTS Antes_Actualizar_LOTE $$
+
 CREATE TRIGGER Antes_Actualizar_LOTE
 BEFORE UPDATE ON LOTE
 FOR EACH ROW
@@ -31,6 +37,8 @@ BEGIN
 END $$
 
 -- Trigger antes de eliminar en LOTE
+DROP TRIGGER IF EXISTS Antes_Actualizar_LOTE $$
+
 CREATE TRIGGER Antes_Eliminar_LOTE
 BEFORE DELETE ON LOTE
 FOR EACH ROW
@@ -41,6 +49,8 @@ BEGIN
 END $$
 
 -- Función para verificar referencias en tablas hijas para LOTE
+DROP FUNCTION IF EXISTS TieneReferencias_LOTE $$
+
 CREATE FUNCTION TieneReferencias_LOTE(L_MANZANA CHAR(3), L_NUMERO CHAR(6)) RETURNS BOOLEAN
 BEGIN
     DECLARE existe BOOLEAN;
@@ -51,6 +61,8 @@ BEGIN
 END $$
 
 -- Trigger antes de eliminar en LOTE que verifica referencias en tablas hijas
+DROP TRIGGER IF EXISTS Antes_Eliminar_LOTE_Ref $$
+
 CREATE TRIGGER Antes_Eliminar_LOTE_Ref
 BEFORE DELETE ON LOTE
 FOR EACH ROW
@@ -61,6 +73,8 @@ BEGIN
 END $$
 
 -- Procedimiento almacenado para insertar en LOTE
+DROP PROCEDURE IF EXISTS Insertar_LOTE $$
+
 CREATE PROCEDURE Insertar_LOTE(
     IN p_L_MANZANA CHAR(3),
     IN p_L_NUMERO CHAR(6),
@@ -88,6 +102,8 @@ BEGIN
 END $$
 
 -- Procedimiento almacenado para eliminar en LOTE
+DROP PROCEDURE IF EXISTS Eliminar_LOTE $$
+
 CREATE PROCEDURE Eliminar_LOTE(
     IN p_L_MANZANA CHAR(3),
     IN p_L_NUMERO CHAR(6)
@@ -101,6 +117,8 @@ BEGIN
 END $$
 
 -- Procedimiento almacenado para buscar en LOTE
+DROP PROCEDURE IF EXISTS Buscar_LOTE $$
+
 CREATE PROCEDURE Buscar_LOTE(
     IN p_L_MANZANA CHAR(3),
     IN p_L_NUMERO CHAR(6)
@@ -122,6 +140,8 @@ BEGIN
 END $$
 
 -- Procedimiento almacenado para actualizar en LOTE
+DROP PROCEDURE IF EXISTS Actualizar_LOTE $$
+
 CREATE PROCEDURE Actualizar_LOTE(
     IN p_L_MANZANA CHAR(3),
     IN p_L_NUMERO CHAR(6),
