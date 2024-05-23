@@ -76,6 +76,9 @@ CREATE PROCEDURE Insertar_LOTE(
 )
 BEGIN
     -- Validación de tipos y restricciones aquí
+    IF p_L_MANZANA IS NULL OR p_L_NUMERO IS NULL THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'L_MANZANA y L_NUMERO no pueden ser nulos';
+    ELSE
 
     -- Intentar la inserción
      INSERT INTO Lote (L_MANZANA, L_NUMERO, CA_CLAVE1, CA_CLAVE2, CA_CLAVE0, L_TOTAL_M2,
@@ -91,6 +94,9 @@ CREATE PROCEDURE Eliminar_LOTE(
 )
 BEGIN
     -- Validar tipo de dato de la llave primaria
+    IF p_L_MANZANA IS NULL OR p_L_NUMERO IS NULL THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'L_MANZANA y L_NUMERO no pueden ser nulos';
+    ELSE
     DELETE FROM LOTE WHERE L_MANZANA = p_L_MANZANA AND L_NUMERO = p_L_NUMERO;
 END $$
 
@@ -101,6 +107,9 @@ CREATE PROCEDURE Buscar_LOTE(
 )
 BEGIN
     -- Validar tipos de datos
+    IF p_L_MANZANA IS NULL OR p_L_NUMERO IS NULL THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'L_MANZANA y L_NUMERO no pueden ser nulos';
+    ELSE
     IF p_L_MANZANA IS NULL OR p_L_NUMERO IS NULL THEN
         SELECT * FROM LOTE;
     ELSE
@@ -128,7 +137,9 @@ CREATE PROCEDURE Actualizar_LOTE(
 )
 BEGIN
     -- Validación de tipos y restricciones aquí
-
+    IF p_L_MANZANA IS NULL OR p_L_NUMERO IS NULL THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'L_MANZANA y L_NUMERO no pueden ser nulos';
+    ELSE
     -- Intentar la actualización
     UPDATE LOTE
     SET
