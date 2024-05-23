@@ -72,13 +72,16 @@ CREATE PROCEDURE Insertar_Catalogo_COL(
 )
 BEGIN
     -- Validación de tipos y restricciones aquí
-
+    IF p_CA_CLAVE IS NULL THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT ='La clave no puede ser null';
+    ELSE
     -- Intentar la inserción
     INSERT INTO Catalogo_COL (
         CA_CLAVE, CA_DESCRIPCION, CA_TIPO, CA_IMPORTE, CON_CLAVE
     ) VALUES (
         p_CA_CLAVE, p_CA_DESCRIPCION, p_CA_TIPO,p_CA_IMPORTE,p_CON_CLAVE
     );
+    END IF;
 END $$
 
 -- Procedimiento almacenado para eliminar en Catalogo_COL
@@ -87,7 +90,11 @@ CREATE PROCEDURE Eliminar_Catalogo_COL(
 )
 BEGIN
     -- Validar tipo de dato de la llave primaria
-    DELETE FROM Catalogo_COL WHERE CA_CLAVE = p_CA_CLAVE;
+    IF p_CA_CLAVE IS NULL THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT ='La clave no puede ser null';
+    ELSE
+        DELETE FROM Catalogo_COL WHERE CA_CLAVE = p_CA_CLAVE;
+    END IF;
 END $$
 
 -- Procedimiento almacenado para buscar en Catalogo_COL
@@ -117,15 +124,18 @@ CREATE PROCEDURE Actualizar_Catalogo_COL(
 )
 BEGIN
     -- Validación de tipos y restricciones aquí
-
+    IF p_CA_CLAVE IS NULL THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT ='La clave no puede ser null';
+    ELSE
     -- Intentar la actualización
-    UPDATE Catalogo_COL
-    SET
-        CA_DESCRIPCION = p_CA_DESCRIPCION,
-        CA_TIPO = p_CA_TIPO,
-        CA_IMPORTE = p_CA_IMPORTE,
-        CON_CLAVE = p_CON_CLAVE
-    WHERE CA_CLAVE = p_CA_CLAVE;
+        UPDATE Catalogo_COL
+        SET
+            CA_DESCRIPCION = p_CA_DESCRIPCION,
+            CA_TIPO = p_CA_TIPO,
+            CA_IMPORTE = p_CA_IMPORTE,
+            CON_CLAVE = p_CON_CLAVE
+        WHERE CA_CLAVE = p_CA_CLAVE;
+    END IF;
 END $$
 
 DELIMITER ;
