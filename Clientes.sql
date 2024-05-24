@@ -1,3 +1,5 @@
+DELIMITER $$
+
 -- Función para verificar si existe un registro en Clientes
 DROP FUNCTION IF EXISTS Existe_CLIENTES $$
 
@@ -5,7 +7,7 @@ CREATE FUNCTION Existe_CLIENTES(p_CL_NUMERO DOUBLE) RETURNS BOOLEAN
 BEGIN
     DECLARE existe BOOLEAN;
     SELECT COUNT(*) > 0 INTO existe
-    FROM Clientes
+    FROM CLIENTES
     WHERE CL_NUMERO = p_CL_NUMERO;
     RETURN existe;
 END $$
@@ -17,7 +19,7 @@ CREATE TRIGGER Antes_Insertar_CLIENTES
 BEFORE INSERT ON CLIENTES
 FOR EACH ROW
 BEGIN
-    IF Existe_Cliente(NEW.CL_NUMERO) THEN
+    IF Existe_CLIENTES(NEW.CL_NUMERO) THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'El registro ya existe en Clientes';
     END IF;
 END $$
@@ -29,7 +31,7 @@ CREATE TRIGGER Antes_Actualizar_CLIENTES
 BEFORE UPDATE ON CLIENTES
 FOR EACH ROW
 BEGIN
-    IF NOT Existe_Cliente(OLD.CL_NUMERO) THEN
+    IF NOT Existe_CLIENTES(OLD.CL_NUMERO) THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'El registro no existe en Clientes';
     END IF;
 END $$
