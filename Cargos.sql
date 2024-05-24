@@ -26,26 +26,27 @@ FOR EACH ROW
 BEGIN
     IF Existe_CARGOS(NEW.CAR_FOLIO, NEW.ANT_DOCTO_CC_ID) THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'El registro ya existe en CARGOS';
-
-    ELSE IF NOT Existe_LOTE(NEW.L_MANZANA,NEW.L_NUMERO) THEN
-    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'NO existe el Lote referenciado'
+    ELSEIF NOT Existe_LOTE(NEW.L_MANZANA, NEW.L_NUMERO) THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'NO existe el Lote referenciado';
+    ELSEIF NOT Existe_CLIENTES(NEW.CL_NUMERO) THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'NO existe el Cliente referenciado';
     END IF;
 END $$
 
 -- Trigger antes de actualizar en CARGOS
-DROP TRIGGER IF EXISTS Antes_Actualizar_CARGOS $$
+DROP TRIGGER IF EXISTS Antes_Eliminar_CARGOS $$
 
-CREATE TRIGGER Antes_Actualizar_CARGOS
-BEFORE UPDATE ON CARGOS
+DROP TRIGGER IF EXISTS Antes_Eliminar_CARGOS $$
+
+CREATE TRIGGER Antes_Eliminar_CARGOS
+BEFORE DELETE ON CARGOS
 FOR EACH ROW
 BEGIN
     IF NOT Existe_CARGOS(OLD.CAR_FOLIO, OLD.ANT_DOCTO_CC_ID) THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'El registro no existe en CARGOS';
-
-    ELSE IF NOT Existe_LOTE(NEW.L_MANZANA,NEW.L_NUMERO) THEN
-    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'NO existe el Lote referenciado'
     END IF;
 END $$
+
 
 -- Trigger antes de eliminar en CARGOS
 
@@ -94,7 +95,6 @@ BEGIN
         p_ANT_CLIENTE_ID, p_ANT_CONC_CC_ID, p_CAR_FECHA_VENCE, p_CAR_DESCUENTO, p_CAR_INICIO
     );
 END $$
-
 
 
 -- Procedimiento almacenado para eliminar en CARGOS

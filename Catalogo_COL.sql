@@ -1,7 +1,3 @@
-DELIMITER $$
-
--- Funciones, Triggers y Procedimientos para la tabla Catalogo_COL
-
 -- Función para verificar la existencia de un registro en Catalogo_COL
 DROP FUNCTION IF EXISTS Existe_CATALOGO_COL $$
 
@@ -77,7 +73,7 @@ DROP PROCEDURE IF EXISTS Insertar_CATALOGO_COL $$
 CREATE PROCEDURE Insertar_CATALOGO_COL(
     IN p_CA_CLAVE CHAR(3),
     IN p_CA_DESCRIPCION CHAR(50),
-    IN p_CA_TIPO CHAR(1),
+    IN p_CA_TIPO SMALLINT,
     IN p_CA_IMPORTE DOUBLE,
     IN p_CON_CLAVE SMALLINT(6)
 )
@@ -135,7 +131,7 @@ DROP PROCEDURE IF EXISTS Actualizar_CATALOGO_COL $$
 CREATE PROCEDURE Actualizar_CATALOGO_COL(
     IN p_CA_CLAVE CHAR(3),
     IN p_CA_DESCRIPCION CHAR(50),
-    IN p_CA_TIPO CHAR(1),
+    IN p_CA_TIPO SMALLINT,
     IN p_CA_IMPORTE DOUBLE,
     IN p_CON_CLAVE SMALLINT(6)
 )
@@ -152,6 +148,7 @@ BEGIN
         CA_IMPORTE = p_CA_IMPORTE,
         CON_CLAVE = p_CON_CLAVE
     WHERE CA_CLAVE = p_CA_CLAVE;
+  END IF;
 END $$
 
 DELIMITER ;
