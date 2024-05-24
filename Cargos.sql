@@ -34,16 +34,16 @@ BEGIN
 END $$
 
 -- Trigger antes de actualizar en CARGOS
-DROP TRIGGER IF EXISTS Antes_Eliminar_CARGOS $$
 
-DROP TRIGGER IF EXISTS Antes_Eliminar_CARGOS $$
-
-CREATE TRIGGER Antes_Eliminar_CARGOS
+DROP TRIGGER IF EXISTS Antes_Actualizar_CARGOS $$
+CREATE TRIGGER Antes_Actualizar_CARGOS
 BEFORE DELETE ON CARGOS
 FOR EACH ROW
 BEGIN
     IF NOT Existe_CARGOS(OLD.CAR_FOLIO, OLD.ANT_DOCTO_CC_ID) THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'El registro no existe en CARGOS';
+    ELSEIF NEW.L_MANZANA != OLD.L_MANZANA OR NEW.L_NUMERO != OLD.L_NUMERO THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'No se puede actualizar las referencias hacia el lote.';
     END IF;
 END $$
 

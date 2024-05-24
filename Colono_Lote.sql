@@ -10,7 +10,7 @@ BEGIN
     DECLARE existe BOOLEAN;
     SELECT COUNT(*) > 0 INTO existe
     FROM COLONO_LOTE
-    WHERE CL_NUMERO = Colono_Lote.CL_NUMERO AND L_MANZANA = Colono_Lote.L_MANZANA AND L_NUMERO = Colono_Lote.L_NUMERO;
+    WHERE CL_NUMERO = COLONO_LOTE.CL_NUMERO AND L_MANZANA = COLONO_LOTE.L_MANZANA AND L_NUMERO = COLONO_LOTE.L_NUMERO;
     RETURN existe;
 END $$
 
@@ -37,9 +37,12 @@ FOR EACH ROW
 BEGIN
     IF NOT Existe_COLONO_LOTE(OLD.CL_NUMERO, OLD.L_MANZANA, OLD.L_NUMERO) THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'El registro no existe en Colono_Lote';
-
     ELSEIF NOT Existe_CLIENTES(NEW.CL_NUMERO) THEN
-    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'NO existe el CLiente referenciado';
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'NO existe el CLiente referenciado';
+    ELSEIF NEW.CL_NUMERO != OLD.CL_NUMERO THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'No se puede actualizar las referencias hacia el cliente.';
+    ELSEIF NEW.L_MANZANA != OLD.L_MANZANA OR NEW.L_NUMERO != OLD.L_NUMERO THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'No se puede actualizar las referencias hacia el lote.';
     END IF;
 
 END $$
