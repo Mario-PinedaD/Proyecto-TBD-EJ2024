@@ -1,4 +1,6 @@
 -- Función para verificar la existencia de un registro en Catalogo_COL
+DELIMITER $$
+
 DROP FUNCTION IF EXISTS Existe_CATALOGO_COL $$
 
 CREATE FUNCTION Existe_CATALOGO_COL(CA_CLAVE CHAR(3)) RETURNS BOOLEAN
@@ -6,7 +8,7 @@ BEGIN
     DECLARE existe BOOLEAN;
     SELECT COUNT(*) > 0 INTO existe
     FROM CATALOGO_COL
-    WHERE CA_CLAVE = Catalogo_COL.CA_CLAVE;
+    WHERE CA_CLAVE = CATALOGO_COL.CA_CLAVE;
     RETURN existe;
 END $$
 
