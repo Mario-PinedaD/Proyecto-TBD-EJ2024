@@ -82,7 +82,7 @@ BEGIN
 END $$
 
 -- Procedimiento almacenado para insertar en Colono_Lote
-DROP PROCEDURE IF EXISTS Antes_Eliminar_COLONO_LOTE_Ref $$
+DROP PROCEDURE IF EXISTS Insertar_COLONO_LOTE $$
 
 CREATE PROCEDURE Insertar_COLONO_LOTE(
     IN p_CL_NUMERO DOUBLE,
