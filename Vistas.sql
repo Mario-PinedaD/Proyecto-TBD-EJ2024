@@ -1,35 +1,43 @@
+DROP VIEW IF EXISTS status;
 CREATE VIEW status as
-    SELECT CA_CLAVE as clave_catalogo ,CA_DESCRIPCION as descripcion ,CA_IMPORTE as importe ,CON_CLAVE as clave_contab FROM Catalogo_COL WHERE CA_TIPO = 0;
+    SELECT CA_CLAVE as clave_catalogo ,CA_DESCRIPCION as descripcion ,CA_IMPORTE as importe ,CON_CLAVE as clave_contab FROM CATALOGO_COL WHERE CA_TIPO = 0;
 
+DROP VIEW IF EXISTS direccion;
 CREATE VIEW direccion as
-    SELECT CA_CLAVE as clave_catalogo ,CA_DESCRIPCION as descripcion, CA_IMPORTE as importe ,CON_CLAVE as clave_contab FROM Catalogo_COL WHERE CA_TIPO = 1;
+    SELECT CA_CLAVE as clave_catalogo ,CA_DESCRIPCION as descripcion, CA_IMPORTE as importe ,CON_CLAVE as clave_contab FROM CATALOGO_COL WHERE CA_TIPO = 1;
 
-CREATE VIEW tipo_lote as
-    SELECT CA_CLAVE as clave_catalogo ,CA_DESCRIPCION as descripcion, CA_IMPORTE as importe ,CON_CLAVE as clave_contab FROM Catalogo_COL WHERE CA_TIPO = 2;
+DROP VIEW IF EXISTS tipo_LOTE;
+CREATE VIEW tipo_LOTE as
+    SELECT CA_CLAVE as clave_catalogo ,CA_DESCRIPCION as descripcion, CA_IMPORTE as importe ,CON_CLAVE as clave_contab FROM CATALOGO_COL WHERE CA_TIPO = 2;
 
+DROP VIEW IF EXISTS reporte_cargos;
 CREATE VIEW reporte_cargos as
-SELECT Clientes.CL_NUMERO as Cliente, Clientes.CL_NOM as Nombre, Clientes.CL_DIREC as Direccion,CARGOS.CAR_FECHA as Fecha, SUM(CARGOS.CAR_IMPORTE) as Cargo_total
-    FROM Clientes
-    JOIN CARGOS ON Clientes.CL_NUMERO = CARGOS.CL_NUMERO
-    GROUP BY Clientes.CL_NUMERO;
+SELECT CLIENTES.CL_NUMERO as Cliente, CLIENTES.CL_NOM as Nombre, CLIENTES.CL_DIREC as Direccion,CARGOS.CAR_FECHA as Fecha, SUM(CARGOS.CAR_IMPORTE) as Cargo_total
+    FROM CLIENTES
+    JOIN CARGOS ON CLIENTES.CL_NUMERO = CARGOS.CL_NUMERO
+    GROUP BY CLIENTES.CL_NUMERO;
 
-CREATE VIEW reporte_lotes as
-SELECT Colono_Lote.CL_NUMERO as Cliente, Clientes.CL_NOM as Nombre, Colono_Lote.L_MANZANA as Manzana, Colono_Lote.L_NUMERO as Lote  FROM Colono_Lote
-    JOIN Clientes ON Clientes.CL_NUMERO = Colono_Lote.CL_NUMERO
+DROP VIEW IF EXISTS reporte_LOTEs;
+CREATE VIEW reporte_LOTEs as
+SELECT COLONO_LOTE.CL_NUMERO as Cliente, CLIENTES.CL_NOM as Nombre, COLONO_LOTE.L_MANZANA as Manzana, COLONO_LOTE.L_NUMERO as LOTE  FROM COLONO_LOTE
+    JOIN CLIENTES ON CLIENTES.CL_NUMERO = COLONO_LOTE.CL_NUMERO
     ORDER BY Nombre;
 
+DROP VIEW IF EXISTS reporte_importe_status;
 CREATE VIEW reporte_importe_status as
-SELECT Catalogo_COL.CA_DESCRIPCION AS Status,SUM(CARGOS.CAR_IMPORTE) AS Importe_Total FROM Catalogo_COL
-    JOIN Lote ON Catalogo_COL.CA_CLAVE = Lote.CA_CLAVE0
-    JOIN CARGOS ON Lote.L_MANZANA = CARGOS.L_MANZANA AND Lote.L_NUMERO = CARGOS.L_NUMERO
-    GROUP BY Catalogo_COL.CA_TIPO, Catalogo_COL.CA_DESCRIPCION;
+SELECT CATALOGO_COL.CA_DESCRIPCION AS Status,SUM(CARGOS.CAR_IMPORTE) AS Importe_Total FROM CATALOGO_COL
+    JOIN LOTE ON CATALOGO_COL.CA_CLAVE = LOTE.CA_CLAVE0
+    JOIN CARGOS ON LOTE.L_MANZANA = CARGOS.L_MANZANA AND LOTE.L_NUMERO = CARGOS.L_NUMERO
+    GROUP BY CATALOGO_COL.CA_TIPO, CATALOGO_COL.CA_DESCRIPCION;
 
+DROP VIEW IF EXISTS reporte_cargos_fecha;
 CREATE VIEW reporte_cargos_fecha as
-SELECT CAR_FECHA as Fecha ,Clientes.CL_NUMERO as Cliente,CAR_IMPORTE as Importe FROM CARGOS
-    JOIN Clientes ON Clientes.CL_NUMERO = CARGOS.CL_NUMERO
+SELECT CAR_FECHA as Fecha ,CLIENTES.CL_NUMERO as Cliente,CAR_IMPORTE as Importe FROM CARGOS
+    JOIN CLIENTES ON CLIENTES.CL_NUMERO = CARGOS.CL_NUMERO
     ORDER BY Fecha;
 DELIMITER $$
 
+DROP PROCEDURE IF EXISTS obtener_reporte_cargos;
 CREATE PROCEDURE obtener_reporte_cargos(IN P_FECHA date)
 BEGIN
     IF ISNULL(P_FECHA) THEN
@@ -39,24 +47,27 @@ BEGIN
     END IF;
 END$$
 
-CREATE PROCEDURE obtener_reporte_lotes(IN P_CLIENTE double)
+DROP PROCEDURE IF EXISTS obtener_reporte_LOTEs;
+CREATE PROCEDURE obtener_reporte_LOTEs(IN P_CLIENTE double)
 BEGIN
     IF ISNULL(P_CLIENTE) THEN
-        SELECT * FROM reporte_lotes;
+        SELECT * FROM reporte_LOTEs;
     ELSE
-        SELECT * FROM reporte_lotes WHERE Cliente = P_CLIENTE;
+        SELECT * FROM reporte_LOTEs WHERE Cliente = P_CLIENTE;
     END IF;
 END$$
 
+DROP PROCEDURE IF EXISTS obtener_importe_status;
 CREATE PROCEDURE obtener_importe_status()
 BEGIN
     SELECT * FROM reporte_importe_status;
 END$$
 
+DROP PROCEDURE IF EXISTS obtener_importe_cargos_fecha;
 CREATE PROCEDURE obtener_importe_cargos_fecha(IN P_FECHA_INICIO date,IN P_FECHA_FIN date)
 BEGIN
     IF ISNULL(P_FECHA_INICIO) OR  isnull(P_FECHA_FIN) THEN
-        SELECT * FROM reporte_lotes;
+        SELECT * FROM reporte_LOTEs;
     ELSE
         SELECT * FROM reporte_cargos_fecha WHERE Fecha BETWEEN P_FECHA_INICIO AND P_FECHA_FIN;
     END IF;
@@ -82,13 +93,13 @@ BEGIN
     RETURN existe;
 END$$
 
-DROP FUNCTION IF EXISTS Existe_TipoLote;
-CREATE FUNCTION Existe_TipoLote(clave_catalogo CHAR(3)) RETURNS BOOLEAN
+DROP FUNCTION IF EXISTS Existe_TipoLOTE;
+CREATE FUNCTION Existe_TipoLOTE(clave_catalogo CHAR(3)) RETURNS BOOLEAN
 BEGIN
     DECLARE existe BOOLEAN;
     SELECT COUNT(*) > 0 INTO existe
-    FROM tipo_lote
-    WHERE tipo_lote.clave_catalogo = clave_catalogo;
+    FROM tipo_LOTE
+    WHERE tipo_LOTE.clave_catalogo = clave_catalogo;
     RETURN existe;
 END$$
 
